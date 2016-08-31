@@ -1,0 +1,5 @@
+= vertx-auth-datastore 
+
+*authentication and authorization based on an IDataStore*
+
+

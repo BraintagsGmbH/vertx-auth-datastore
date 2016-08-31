@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>vertx-auth-datastore</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<name>vertx-auth-datastore</name>
+
+	<parent>
+		<groupId>de.braintags</groupId>
+		<artifactId>btVertxBasePOM</artifactId>
+		<version>19-SNAPSHOT</version>
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<thymeleaf.version>2.1.4.RELEASE</thymeleaf.version>
+		<vertx.web.version>3.2.1</vertx.web.version>
+		<maven.test.skip>false</maven.test.skip>
+		<doc.skip>false</doc.skip>
+		<source.skip>false</source.skip>
+		<testjar.skip>false</testjar.skip>
+	    <jacoco.haltOnFailure>false</jacoco.haltOnFailure>
+	</properties>
+
+	<dependencies>
+	    <dependency>
+	      <groupId>io.vertx</groupId>
+	      <artifactId>vertx-auth-common</artifactId>
+	    </dependency>
+		<dependency>
+			<groupId>de.braintags</groupId>
+			<artifactId>vertx-pojo-mapper-mysql</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>netty-all</artifactId>
+					<groupId>io.netty</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>de.braintags</groupId>
+			<artifactId>vertx-pojongo</artifactId>
+		</dependency>
+
+	</dependencies>
+
+	<url>https://github.com/BraintagsGmbH/vertx-auth-datastore</url>
+	<description>authentication based on datastore from poco-mapper</description>
+</project>
