@@ -15,8 +15,14 @@ package de.braintags.vertx.auth.datastore.impl;
 import java.util.List;
 
 import de.braintags.io.vertx.pojomapper.IDataStore;
+import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
+import de.braintags.io.vertx.pojomapper.exception.NoSuchMapperException;
+import de.braintags.io.vertx.pojomapper.mapping.IMapper;
+import de.braintags.io.vertx.pojomapper.util.QueryHelper;
+import de.braintags.io.vertx.util.exception.ParameterRequiredException;
+import de.braintags.vertx.auth.datastore.AuthenticationException;
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
-import de.braintags.vertx.auth.datastore.IHashStrategy;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -34,17 +40,8 @@ public class DataStoreAuth implements IDatastoreAuth {
       .getLogger(DataStoreAuth.class);
 
   private IDataStore datastore;
-  private String usernameField = DEFAULT_USERNAME_FIELD;
-  private String passwordField = DEFAULT_PASSWORD_FIELD;
-  private String roleField = DEFAULT_ROLE_FIELD;
-  private String permissionField = DEFAULT_PERMISSION_FIELD;
-  private String usernameCredentialField = DEFAULT_CREDENTIAL_USERNAME_FIELD;
-  private String passwordCredentialField = DEFAULT_CREDENTIAL_PASSWORD_FIELD;
-  private String saltField = DEFAULT_SALT_FIELD;
-  private String mapperName = null;
   private JsonObject config;
-
-  private IHashStrategy hashStrategy;
+  private IMapper mapper;
 
   public DataStoreAuth(IDataStore datastore, JsonObject config) {
     this.datastore = datastore;
@@ -52,14 +49,115 @@ public class DataStoreAuth implements IDatastoreAuth {
     init();
   }
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see io.vertx.ext.auth.AuthProvider#authenticate(io.vertx.core.json.JsonObject, io.vertx.core.Handler)
+  /**
+   * Initializes the current provider by using the current config object
    */
+  private void init() {
+    initMapper();
+  }
+
+  /**
+   * 
+   */
+  @SuppressWarnings("rawtypes")
+  private void initMapper() {
+    String mapperName = config.getString(PROPERTY_MAPPER_CLASS_NAME, null);
+    if (mapperName == null) {
+      throw new ParameterRequiredException(PROPERTY_MAPPER_CLASS_NAME);
+    } else {
+      try {
+        Class mapperClass = Class.forName(mapperName);
+        this.mapper = datastore.getMapperFactory().getMapper(mapperClass);
+      } catch (ClassNotFoundException e) {
+        throw new NoSuchMapperException(mapperName, e);
+      }
+    }
+  }
+
   @Override
-  public void authenticate(JsonObject arg0, Handler<AsyncResult<User>> resultHandler) {
-    resultHandler.handle(Future.failedFuture(new UnsupportedOperationException()));
+  public void authenticate(JsonObject authInfo, Handler<AsyncResult<User>> resultHandler) {
+    String username = authInfo.getString(CREDENTIAL_USERNAME_FIELD);
+    String password = authInfo.getString(CREDENTIAL_PASSWORD_FIELD);
+    if (username == null) {
+      resultHandler
+          .handle(Future.failedFuture(new ParameterRequiredException("Username must be set for authentication.")));
+      return;
+    } else if (password == null) {
+      resultHandler
+          .handle(Future.failedFuture(new ParameterRequiredException("Password must be set for authentication.")));
+      return;
+    } else {
+      AuthToken token = new AuthToken(username, password);
+      IQuery<IAuthenticatable> query = createQuery(username);
+      QueryHelper.executeToList(query, res -> {
+        try {
+          if (res.succeeded()) {
+            User user = handleSelection(res, token);
+            resultHandler.handle(Future.succeededFuture(user));
+          } else {
+            resultHandler.handle(Future.failedFuture(res.cause()));
+          }
+        } catch (Exception e) {
+          LOGGER.warn(e);
+          resultHandler.handle(Future.failedFuture(e));
+        }
+      });
+    }
+  }
+
+  /**
+   * Examine the selection of found users and return one, if password is fitting,
+   * 
+   * @param resultList
+   * @param authToken
+   * @return
+   */
+  private User handleSelection(AsyncResult<List<?>> resultList, AuthToken authToken) throws AuthenticationException {
+    switch (resultList.result().size()) {
+    case 0:
+      throw new AuthenticationException("No account found for user [" + authToken.username + "]");
+
+    case 1:
+      DatastoreUser user = new DatastoreUser((IAuthenticatable) resultList.result().get(0), this);
+      if (examinePassword(user, authToken))
+        return user;
+      else {
+        throw new AuthenticationException("Invalid username/password [" + authToken.username + "]");
+      }
+
+    default:
+      // More than one row returned!
+      String message = "More than one user found for [" + authToken.username + "( " + resultList.result().size()
+          + " )]. Usernames must be unique.";
+      throw new AuthenticationException(message);
+    }
+
+  }
+
+  /**
+   * Examine the given user object. Returns true, if object fits the given authentication
+   * 
+   * @param user
+   * @param authToken
+   * @return
+   */
+  private boolean examinePassword(DatastoreUser user, AuthToken authToken) {
+    String storedPassword = user.getAuthenticatable().getPassword();
+    String givenPassword = authToken.password;
+    return storedPassword != null && storedPassword.equals(givenPassword);
+  }
+
+  /**
+   * The default implementation uses the usernameField as search field
+   * 
+   * @param username
+   * @return
+   */
+  @SuppressWarnings("unchecked")
+  protected IQuery<IAuthenticatable> createQuery(String username) {
+    IQuery<IAuthenticatable> query = (IQuery<IAuthenticatable>) datastore.createQuery(mapper.getMapperClass());
+    query.field("email").is(username);
+    return query;
   }
 
   /*
@@ -68,85 +166,8 @@ public class DataStoreAuth implements IDatastoreAuth {
    * @see de.braintags.vertx.auth.datastore.DatastoreAuth#setCollectionName(java.lang.String)
    */
   @Override
-  public IDatastoreAuth setMapperName(String mapperName) {
-    this.mapperName = mapperName;
-    return this;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#setUsernameField(java.lang.String)
-   */
-  @Override
-  public IDatastoreAuth setUsernameField(String usernameField) {
-    this.usernameField = usernameField;
-    return this;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#setPasswordField(java.lang.String)
-   */
-  @Override
-  public IDatastoreAuth setPasswordField(String passwordField) {
-    this.passwordField = passwordField;
-    return this;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#setRoleField(java.lang.String)
-   */
-  @Override
-  public IDatastoreAuth setRoleField(String roleField) {
-    this.roleField = roleField;
-    return this;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#setPermissionField(java.lang.String)
-   */
-  @Override
-  public IDatastoreAuth setPermissionField(String permissionField) {
-    this.permissionField = permissionField;
-    return this;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#setUsernameCredentialField(java.lang.String)
-   */
-  @Override
-  public IDatastoreAuth setUsernameCredentialField(String usernameCredentialField) {
-    this.usernameCredentialField = usernameCredentialField;
-    return this;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#setPasswordCredentialField(java.lang.String)
-   */
-  @Override
-  public IDatastoreAuth setPasswordCredentialField(String passwordCredentialField) {
-    this.passwordCredentialField = passwordCredentialField;
-    return this;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#setSaltField(java.lang.String)
-   */
-  @Override
-  public IDatastoreAuth setSaltField(String saltField) {
-    this.saltField = saltField;
+  public IDatastoreAuth setMapper(IMapper mapper) {
+    this.mapper = mapper;
     return this;
   }
 
@@ -156,112 +177,22 @@ public class DataStoreAuth implements IDatastoreAuth {
    * @see de.braintags.vertx.auth.datastore.DatastoreAuth#getCollectionName()
    */
   @Override
-  public String getMapperName() {
-    return mapperName;
+  public IMapper getMapper() {
+    return mapper;
   }
 
-  /*
-   * (non-Javadoc)
+  /**
+   * The incoming data from an authentication request
    * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#getUsernameField()
+   * @author mremme
    */
-  @Override
-  public String getUsernameField() {
-    return usernameField;
-  }
+  static class AuthToken {
+    String username;
+    String password;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#getPasswordField()
-   */
-  @Override
-  public String getPasswordField() {
-    return passwordField;
+    AuthToken(String username, String password) {
+      this.username = username;
+      this.password = password;
+    }
   }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#getRoleField()
-   */
-  @Override
-  public String getRoleField() {
-    return roleField;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#getPermissionField()
-   */
-  @Override
-  public String getPermissionField() {
-    return permissionField;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#getUsernameCredentialField()
-   */
-  @Override
-  public String getUsernameCredentialField() {
-    return usernameCredentialField;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#getPasswordCredentialField()
-   */
-  @Override
-  public String getPasswordCredentialField() {
-    return passwordCredentialField;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#getSaltField()
-   */
-  @Override
-  public String getSaltField() {
-    return saltField;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see
-   * de.braintags.vertx.auth.datastore.DatastoreAuth#setHashStrategy(de.braintags.vertx.auth.datastore.HashStrategy)
-   */
-  @Override
-  public IDatastoreAuth setHashStrategy(IHashStrategy hashStrategy) {
-    this.hashStrategy = hashStrategy;
-    return this;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#getHashStrategy()
-   */
-  @Override
-  public IHashStrategy getHashStrategy() {
-    return hashStrategy;
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see de.braintags.vertx.auth.datastore.DatastoreAuth#insertUser(java.lang.String, java.lang.String, java.util.List,
-   * java.util.List, io.vertx.core.Handler)
-   */
-  @Override
-  public void insertUser(String username, String password, List<String> roles, List<String> permissions,
-      Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.failedFuture(new UnsupportedOperationException()));
-  }
-
 }
