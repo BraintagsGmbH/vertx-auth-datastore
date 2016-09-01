@@ -50,6 +50,22 @@
 			<groupId>de.braintags</groupId>
 			<artifactId>vertx-util</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.12</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>de.braintags</groupId>
+			<artifactId>vertx-pojongo</artifactId>
+			<scope>test</scope>
+			<classifier>tests</classifier>
+			<version>${bt.vertx.version}</version>
+		</dependency>
+		
 	</dependencies>
 
 	<url>https://github.com/BraintagsGmbH/vertx-auth-datastore</url>
