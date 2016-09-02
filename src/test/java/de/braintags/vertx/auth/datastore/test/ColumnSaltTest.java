@@ -31,6 +31,7 @@ public class ColumnSaltTest extends DatastoreAuthBaseTest {
   @Test
   public void simpleTest(TestContext context) {
     getAuth(context);
+    context.fail("unimplemented");
 
   }
 

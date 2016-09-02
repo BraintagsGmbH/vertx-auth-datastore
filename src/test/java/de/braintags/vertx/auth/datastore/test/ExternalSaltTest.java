@@ -31,7 +31,7 @@ public class ExternalSaltTest extends DatastoreAuthBaseTest {
   @Test
   public void simpleTest(TestContext context) {
     getAuth(context);
-
+    context.fail("unimplemented");
   }
 
 }
