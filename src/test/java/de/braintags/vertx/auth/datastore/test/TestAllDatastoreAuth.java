@@ -17,7 +17,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ NoSaltTest.class, ExternalSaltTest.class, ColumnSaltTest.class })
+@SuiteClasses({ NoSaltTest.class, EncryptedPasswordTest.class })
 public class TestAllDatastoreAuth {
 
 }

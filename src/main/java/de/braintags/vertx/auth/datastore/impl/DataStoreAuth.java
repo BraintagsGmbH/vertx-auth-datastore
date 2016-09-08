@@ -19,7 +19,9 @@ import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.exception.NoSuchMapperException;
 import de.braintags.io.vertx.pojomapper.mapping.IMapper;
 import de.braintags.io.vertx.pojomapper.util.QueryHelper;
+import de.braintags.io.vertx.util.exception.InitException;
 import de.braintags.io.vertx.util.exception.ParameterRequiredException;
+import de.braintags.io.vertx.util.security.crypt.IEncoder;
 import de.braintags.vertx.auth.datastore.AuthenticationException;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
@@ -42,6 +44,7 @@ public class DataStoreAuth implements IDatastoreAuth {
   private IDataStore datastore;
   private JsonObject config;
   private IMapper mapper;
+  private IEncoder encoder;
 
   public DataStoreAuth(IDataStore datastore, JsonObject config) {
     this.datastore = datastore;
@@ -66,10 +69,14 @@ public class DataStoreAuth implements IDatastoreAuth {
       throw new ParameterRequiredException(PROPERTY_MAPPER_CLASS_NAME);
     } else {
       try {
-        Class mapperClass = Class.forName(mapperName);
+        Class<? extends IAuthenticatable> mapperClass = (Class<? extends IAuthenticatable>) Class.forName(mapperName);
+        LOGGER.info("Mapper for auth is " + mapperName);
         this.mapper = datastore.getMapperFactory().getMapper(mapperClass);
+        encoder = mapper.getField("password").getEncoder();
       } catch (ClassNotFoundException e) {
         throw new NoSuchMapperException(mapperName, e);
+      } catch (ClassCastException e) {
+        throw new InitException("mapper must be an instance of IAuthenticatable");
       }
     }
   }
@@ -98,7 +105,7 @@ public class DataStoreAuth implements IDatastoreAuth {
             resultHandler.handle(Future.failedFuture(res.cause()));
           }
         } catch (Exception e) {
-          LOGGER.warn(e);
+          LOGGER.warn("", e);
           resultHandler.handle(Future.failedFuture(e));
         }
       });
@@ -144,7 +151,11 @@ public class DataStoreAuth implements IDatastoreAuth {
   private boolean examinePassword(DatastoreUser user, AuthToken authToken) {
     String storedPassword = user.getAuthenticatable().getPassword();
     String givenPassword = authToken.password;
-    return storedPassword != null && storedPassword.equals(givenPassword);
+    if (encoder != null) {
+      return encoder.matches(givenPassword, storedPassword);
+    } else {
+      return storedPassword != null && storedPassword.equals(givenPassword);
+    }
   }
 
   /**

@@ -5,9 +5,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>vertx-key-generator</artifactId>
-	<version>${BT_VERTX_VERSION}</version>
-	<name>Verticle for generation of IDs</name>
+	<artifactId>vertx-auth-datastore</artifactId>
+	<version>${DATASTORE_AUTH}</version>
+	<name>vertx-auth-datastore</name>
+	<url>https://github.com/BraintagsGmbH/vertx-auth-datastore</url>
+	<description>authentication based on datastore from pojo-mapper</description>
 
 	<parent>
 		<groupId>de.braintags</groupId>
@@ -32,40 +34,40 @@
 	</scm>
 	
 	<dependencies>
+	    <dependency>
+	      <groupId>io.vertx</groupId>
+	      <artifactId>vertx-auth-common</artifactId>
+	    </dependency>
+		<dependency>
+			<groupId>de.braintags</groupId>
+			<artifactId>vertx-pojo-mapper-mysql</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>netty-all</artifactId>
+					<groupId>io.netty</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>de.braintags</groupId>
+			<artifactId>vertx-pojongo</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>de.braintags</groupId>
 			<artifactId>vertx-util</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.braintags</groupId>
-			<artifactId>vertx-util</artifactId>
-			<classifier>tests</classifier>
-		</dependency>
-		
-		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-mongo-embedded-db</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-mongo-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-mongo-service</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-mongo-service</artifactId>
-			<scope>test</scope>
-			<classifier>tests</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.12</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>de.braintags</groupId>
+			<artifactId>vertx-pojongo</artifactId>
+			<scope>test</scope>
+			<classifier>tests</classifier>
+			<version>${bt.vertx.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -96,6 +98,4 @@
 		</pluginManagement>
 	</build>
 	
-	<url>https://github.com/BraintagsGmbH/vertx-key-generator</url>
-	<description>a verticle for the generation of unique IDs</description>
 </project>

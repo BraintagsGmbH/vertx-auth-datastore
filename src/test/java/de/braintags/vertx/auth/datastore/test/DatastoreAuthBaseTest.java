@@ -22,7 +22,9 @@ import java.util.List;
 
 import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
 import de.braintags.io.vertx.pojomapper.testdatastore.DatastoreBaseTest;
+import de.braintags.io.vertx.util.ErrorObject;
 import de.braintags.vertx.auth.datastore.AuthenticationException;
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import de.braintags.vertx.auth.datastore.test.model.TestMember;
 import io.vertx.core.json.JsonObject;
@@ -35,6 +37,9 @@ import io.vertx.ext.unit.TestContext;
  */
 
 public abstract class DatastoreAuthBaseTest extends DatastoreBaseTest {
+  private static final io.vertx.core.logging.Logger LOGGER = io.vertx.core.logging.LoggerFactory
+      .getLogger(DatastoreAuthBaseTest.class);
+
   public static final String USERNAME = "email";
   public static final String PASSWORD = "password";
 
@@ -43,10 +48,14 @@ public abstract class DatastoreAuthBaseTest extends DatastoreBaseTest {
   protected IDatastoreAuth getAuth(TestContext context) {
     if (datastoreAuth == null) {
       initDemoData(context);
-      JsonObject config = new JsonObject().put(IDatastoreAuth.PROPERTY_MAPPER_CLASS_NAME, TestMember.class.getName());
+      JsonObject config = new JsonObject().put(IDatastoreAuth.PROPERTY_MAPPER_CLASS_NAME, getMapperClass().getName());
       datastoreAuth = IDatastoreAuth.create(getDataStore(context), config);
     }
     return datastoreAuth;
+  }
+
+  protected Class getMapperClass() {
+    return TestMember.class;
   }
 
   /**
@@ -62,8 +71,8 @@ public abstract class DatastoreAuthBaseTest extends DatastoreBaseTest {
     find(context, q, 5);
   }
 
-  protected List<TestMember> createUserList() {
-    List<TestMember> users = new ArrayList<>();
+  protected List<IAuthenticatable> createUserList() {
+    List<IAuthenticatable> users = new ArrayList<>();
     users.add(new TestMember("Michael", "ps1", null, null));
     users.add(new TestMember("Doublette", "ps1", null, null));
     users.add(new TestMember("Doublette", "ps2", null, null));
@@ -76,40 +85,58 @@ public abstract class DatastoreAuthBaseTest extends DatastoreBaseTest {
 
   protected void expectFound(TestContext context, JsonObject authInfo) {
     Async async = context.async();
-    getAuth(context).authenticate(authInfo, result -> {
-      try {
-        if (result.failed()) {
-          context.fail(result.cause());
-        } else {
-          context.assertNotNull(result.result(), "Did not find user; User is null");
+    ErrorObject err = new ErrorObject<>(null);
+    try {
+      getAuth(context).authenticate(authInfo, result -> {
+        try {
+          if (result.failed()) {
+            err.setThrowable(result.cause());
+          } else {
+            context.assertNotNull(result.result(), "Did not find user; User is null");
+          }
+        } finally {
+          async.complete();
         }
-      } finally {
-        async.complete();
-      }
-    });
+      });
+    } catch (Exception e) {
+      err.setThrowable(e);
+      async.complete();
+    }
     async.await();
+    if (err.isError()) {
+      throw err.getRuntimeException();
+    }
   }
 
   protected void expectNotFound(TestContext context, JsonObject authInfo) {
     Async async = context.async();
-    getAuth(context).authenticate(authInfo, result -> {
-      try {
-        if (result.failed()) {
-          Throwable ex = result.cause();
-          context.assertTrue(ex instanceof AuthenticationException,
-              "expected AuthenticationException when a user was not found");
-          String message = ex.getMessage();
-          context.assertTrue(
-              message.contains("No account found for user") || message.contains("Invalid username/password"),
-              "wrong message: " + message);
-        } else {
-          context.fail("expected AuthenticationException cause user was not found");
+    ErrorObject err = new ErrorObject<>(null);
+    try {
+      getAuth(context).authenticate(authInfo, result -> {
+        try {
+          if (result.failed()) {
+            Throwable ex = result.cause();
+            context.assertTrue(ex instanceof AuthenticationException,
+                "expected AuthenticationException when a user was not found");
+            String message = ex.getMessage();
+            context.assertTrue(
+                message.contains("No account found for user") || message.contains("Invalid username/password"),
+                "wrong message: " + message);
+          } else {
+            err.setThrowable(new IllegalArgumentException("expected AuthenticationException cause user was not found"));
+          }
+        } finally {
+          async.complete();
         }
-      } finally {
-        async.complete();
-      }
-    });
+      });
+    } catch (Exception e) {
+      err.setThrowable(e);
+      async.complete();
+    }
     async.await();
+    if (err.isError()) {
+      throw err.getRuntimeException();
+    }
   }
 
   protected void expectDublette(TestContext context, JsonObject authInfo) {
