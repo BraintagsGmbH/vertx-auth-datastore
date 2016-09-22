@@ -99,6 +99,7 @@ public class DataStoreAuth implements IDatastoreAuth {
       QueryHelper.executeToList(query, res -> {
         try {
           if (res.succeeded()) {
+            LOGGER.debug("found users: " + res.result().size());
             User user = handleSelection(res, token);
             resultHandler.handle(Future.succeededFuture(user));
           } else {
