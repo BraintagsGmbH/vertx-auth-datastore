@@ -1,0 +1,19 @@
+apply from: 'gradle/vertx/vertxbase.gradle'
+
+dependencies {
+  compile group:'io.vertx', name:'vertx-auth-common', version: vertxVersion
+  compile (group:'de.braintags', name:'vertx-pojo-mapper-mysql', version: btVertxVersion) {
+    exclude module:'netty-all'
+  }
+  compile group:'de.braintags', name:'vertx-pojongo', version: btVertxVersion
+  compile group:'de.braintags', name:'vertx-util', version: btVertxVersion
+
+  testCompile group:'org.slf4j', name:'slf4j-simple', version: '1.7.12'
+  testCompile group:'de.braintags', name:'vertx-pojongo', version: btVertxVersion, classifier:'tests'
+}
+
+test {
+  systemProperty 'IDatastoreContainer', 'de.braintags.io.vertx.pojomapper.mongo.vertxunit.MongoDataStoreContainer'
+  systemProperty 'startMongoLocal', 'true'
+  systemProperty 'db_name', 'auth_datastore_db'
+}
