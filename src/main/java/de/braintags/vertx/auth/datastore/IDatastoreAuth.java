@@ -26,10 +26,9 @@ import io.vertx.ext.auth.User;
 /**
  * An extension of AuthProvider which is using an {@link IDataStore} as source. The mapper, which is used, must be an
  * implementation of {@link IAuthenticatable}
- * 
+ *
  * @author Michael Remme
  */
-@VertxGen
 public interface IDatastoreAuth extends AuthProvider {
 
   /**
@@ -57,12 +56,12 @@ public interface IDatastoreAuth extends AuthProvider {
   /**
    * Creates an instance of IDatastoreAuth by using the given {@link IDataStore} and configuration object. An example
    * for a configuration object:
-   * 
+   *
    * <pre>
    * JsonObject js = new JsonObject();
    * js.put(IDatastoreAuth.PROPERTY_MAPPER_NAME, "class.path.to.member");
    * </pre>
-   * 
+   *
    * @param datastore
    *          the datastore to be used
    * @param config
@@ -75,7 +74,7 @@ public interface IDatastoreAuth extends AuthProvider {
 
   /**
    * Set the name of the mapper to be used. There is no default
-   * 
+   *
    * @param mapper
    *          the mapper to be used for storing and reading user data
    * @return the current instance itself for fluent calls
@@ -85,7 +84,7 @@ public interface IDatastoreAuth extends AuthProvider {
 
   /**
    * The {@link IMapper} used to store User objects inside. Defaults to {@link #DEFAULT_COLLECTION_NAME}
-   * 
+   *
    * @return the collectionName
    */
   IMapper getMapper();
