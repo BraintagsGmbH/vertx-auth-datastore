@@ -71,7 +71,7 @@ public class EncryptedPasswordTest extends DatastoreAuthBaseTest {
     find(context, q, 5);
 
     IQuery<TestMemberEncrypted> q2 = getDataStore(context).createQuery(TestMemberEncrypted.class);
-    q2.field("email").is("Michael");
+    q2.setSearchCondition(q2.isEqual("email", "Michael"));
     TestMemberEncrypted m = (TestMemberEncrypted) findFirst(context, q2);
     context.assertNotEquals(CHECKPASSWORD, m.getPassword());
     LOGGER.info("Create demodata FINISHED");

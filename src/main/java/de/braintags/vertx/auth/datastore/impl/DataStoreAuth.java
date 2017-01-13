@@ -76,7 +76,7 @@ public class DataStoreAuth implements IDatastoreAuth {
       } catch (ClassNotFoundException e) {
         throw new NoSuchMapperException(mapperName, e);
       } catch (ClassCastException e) {
-        throw new InitException("mapper must be an instance of IAuthenticatable");
+        throw new InitException("mapper must be an instance of IAuthenticatable", e);
       }
     }
   }
@@ -120,19 +120,17 @@ public class DataStoreAuth implements IDatastoreAuth {
    * @param authToken
    * @return
    */
-  private User handleSelection(AsyncResult<List<?>> resultList, AuthToken authToken) throws AuthenticationException {
+  private User handleSelection(AsyncResult<List<IAuthenticatable>> resultList, AuthToken authToken)
+      throws AuthenticationException {
     switch (resultList.result().size()) {
     case 0:
       throw new AuthenticationException("No account found for user [" + authToken.username + "]");
-
     case 1:
-      DatastoreUser user = new DatastoreUser((IAuthenticatable) resultList.result().get(0), this);
+      DatastoreUser user = new DatastoreUser(resultList.result().get(0), this);
       if (examinePassword(user, authToken))
         return user;
-      else {
+      else
         throw new AuthenticationException("Invalid username/password [" + authToken.username + "]");
-      }
-
     default:
       // More than one row returned!
       String message = "More than one user found for [" + authToken.username + "( " + resultList.result().size()
@@ -167,8 +165,8 @@ public class DataStoreAuth implements IDatastoreAuth {
    */
   @SuppressWarnings("unchecked")
   protected IQuery<IAuthenticatable> createQuery(String username) {
-    IQuery<IAuthenticatable> query = (IQuery<IAuthenticatable>) datastore.createQuery(mapper.getMapperClass());
-    query.field("email").is(username);
+    IQuery<IAuthenticatable> query = datastore.createQuery(mapper.getMapperClass());
+    query.setSearchCondition(query.isEqual("email", username));
     return query;
   }
 
