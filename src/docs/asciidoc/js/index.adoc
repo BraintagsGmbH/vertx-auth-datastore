@@ -1,0 +1,4 @@
+Authentication across an `IDataStore`
+Crypt of passwords is ruled by mapper specifications by using the
+`@Encoder` annotation
+Michael Remme

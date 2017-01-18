@@ -1,0 +1,4 @@
+Authentication across an `link:unavailable[IDataStore]`
+Crypt of passwords is ruled by mapper specifications by using the
+`link:unavailable[@Encoder]` annotation
+Michael Remme
