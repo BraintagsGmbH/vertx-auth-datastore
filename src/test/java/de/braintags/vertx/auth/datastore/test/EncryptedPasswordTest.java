@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import de.braintags.vertx.auth.datastore.test.model.TestMemberEncrypted;

@@ -13,8 +13,8 @@
 
 package de.braintags.vertx.auth.datastore;
 
-import de.braintags.io.vertx.pojomapper.IDataStore;
-import de.braintags.io.vertx.pojomapper.mapping.IMapper;
+import de.braintags.vertx.jomnigate.IDataStore;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.vertx.auth.datastore.impl.DataStoreAuth;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;

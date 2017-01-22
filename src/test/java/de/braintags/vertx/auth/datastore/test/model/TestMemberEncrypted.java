@@ -14,9 +14,9 @@ package de.braintags.vertx.auth.datastore.test.model;
 
 import java.util.List;
 
-import de.braintags.io.vertx.pojomapper.annotation.Entity;
-import de.braintags.io.vertx.pojomapper.annotation.field.Encoder;
-import de.braintags.io.vertx.pojomapper.annotation.field.Id;
+import de.braintags.vertx.jomnigate.annotation.Entity;
+import de.braintags.vertx.jomnigate.annotation.field.Encoder;
+import de.braintags.vertx.jomnigate.annotation.field.Id;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 
 /**

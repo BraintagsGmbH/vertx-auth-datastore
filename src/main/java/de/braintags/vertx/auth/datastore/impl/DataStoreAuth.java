@@ -14,14 +14,14 @@ package de.braintags.vertx.auth.datastore.impl;
 
 import java.util.List;
 
-import de.braintags.io.vertx.pojomapper.IDataStore;
-import de.braintags.io.vertx.pojomapper.dataaccess.query.IQuery;
-import de.braintags.io.vertx.pojomapper.exception.NoSuchMapperException;
-import de.braintags.io.vertx.pojomapper.mapping.IMapper;
-import de.braintags.io.vertx.pojomapper.util.QueryHelper;
-import de.braintags.io.vertx.util.exception.InitException;
-import de.braintags.io.vertx.util.exception.ParameterRequiredException;
-import de.braintags.io.vertx.util.security.crypt.IEncoder;
+import de.braintags.vertx.jomnigate.IDataStore;
+import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.exception.NoSuchMapperException;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
+import de.braintags.vertx.jomnigate.util.QueryHelper;
+import de.braintags.vertx.util.exception.InitException;
+import de.braintags.vertx.util.exception.ParameterRequiredException;
+import de.braintags.vertx.util.security.crypt.IEncoder;
 import de.braintags.vertx.auth.datastore.AuthenticationException;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
