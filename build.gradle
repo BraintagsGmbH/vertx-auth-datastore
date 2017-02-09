@@ -9,7 +9,12 @@ dependencies {
   compile group:'de.braintags', name:'vertx-util', version: btVertxVersion
 
   testCompile group:'org.slf4j', name:'slf4j-simple', version: '1.7.12'
-  testCompile group:'de.braintags', name:'vertx-pojongo', version: btVertxVersion, classifier:'tests'
+  if (isIncludedBuild) {
+    testCompile group:'de.braintags', name:'vertx-pojongo', version: btVertxVersion, configuration:'commonTests'
+  } else {
+    testCompile group:'de.braintags', name:'vertx-pojongo', version: btVertxVersion, classifier:'tests'
+  }
+  testCompile group:'de.braintags', name:'vertx-pojo-mapper-common-test', version: btVertxVersion
 }
 
 test {
