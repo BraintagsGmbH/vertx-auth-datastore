@@ -14,17 +14,18 @@ package de.braintags.vertx.auth.datastore.impl;
 
 import java.util.List;
 
+import de.braintags.vertx.auth.datastore.AuthenticationException;
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
+import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import de.braintags.vertx.jomnigate.IDataStore;
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.jomnigate.exception.NoSuchMapperException;
 import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.vertx.jomnigate.util.QueryHelper;
 import de.braintags.vertx.util.exception.InitException;
 import de.braintags.vertx.util.exception.ParameterRequiredException;
 import de.braintags.vertx.util.security.crypt.IEncoder;
-import de.braintags.vertx.auth.datastore.AuthenticationException;
-import de.braintags.vertx.auth.datastore.IAuthenticatable;
-import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -166,7 +167,7 @@ public class DataStoreAuth implements IDatastoreAuth {
   @SuppressWarnings("unchecked")
   protected IQuery<IAuthenticatable> createQuery(String username) {
     IQuery<IAuthenticatable> query = datastore.createQuery(mapper.getMapperClass());
-    query.setSearchCondition(query.isEqual("email", username));
+    query.setSearchCondition(ISearchCondition.isEqual("email", username));
     return query;
   }
 

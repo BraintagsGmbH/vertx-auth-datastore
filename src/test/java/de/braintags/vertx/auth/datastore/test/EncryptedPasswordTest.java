@@ -19,6 +19,7 @@ import java.util.List;
 import org.junit.Test;
 
 import de.braintags.vertx.jomnigate.dataaccess.query.IQuery;
+import de.braintags.vertx.jomnigate.dataaccess.query.ISearchCondition;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
 import de.braintags.vertx.auth.datastore.test.model.TestMemberEncrypted;
@@ -71,7 +72,7 @@ public class EncryptedPasswordTest extends DatastoreAuthBaseTest {
     find(context, q, 5);
 
     IQuery<TestMemberEncrypted> q2 = getDataStore(context).createQuery(TestMemberEncrypted.class);
-    q2.setSearchCondition(q2.isEqual("email", "Michael"));
+    q2.setSearchCondition(ISearchCondition.isEqual("email", "Michael"));
     TestMemberEncrypted m = (TestMemberEncrypted) findFirst(context, q2);
     context.assertNotEquals(CHECKPASSWORD, m.getPassword());
     LOGGER.info("Create demodata FINISHED");
