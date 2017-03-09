@@ -1,0 +1,4 @@
+Authentication across an `link:../../apidocs/de/braintags/vertx/jomnigate/IDataStore.html[IDataStore]`
+Crypt of passwords is ruled by mapper specifications by using the
+`link:../../apidocs/de/braintags/vertx/jomnigate/annotation/field/Encoder.html[@Encoder]` annotation
+Michael Remme
