@@ -13,10 +13,10 @@
 
 package de.braintags.vertx.auth.datastore.impl;
 
-import de.braintags.vertx.jomnigate.mapping.IField;
-import de.braintags.vertx.jomnigate.mapping.IMapper;
 import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.auth.datastore.IDatastoreAuth;
+import de.braintags.vertx.jomnigate.mapping.IField;
+import de.braintags.vertx.jomnigate.mapping.IMapper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -54,7 +54,7 @@ public class DatastoreUser extends AbstractUser {
   private void createPrincipal() {
     this.principal = new JsonObject();
     IMapper mapper = datastoreAuth.getMapper();
-    IField idField = mapper.getIdField();
+    IField idField = mapper.getIdField().getField();
     Object idValue = idField.getPropertyAccessor().readData(userObject);
     principal.put(idField.getName(), idValue).put("email", userObject.getEmail());
   }

@@ -14,6 +14,9 @@ package de.braintags.vertx.auth.datastore;
 
 import java.util.List;
 
+import de.braintags.vertx.jomnigate.dataaccess.query.IIndexedField;
+import de.braintags.vertx.jomnigate.dataaccess.query.impl.IndexedField;
+
 /**
  * The interface defines the base fields for an instance, who is able to authenticate inside the current
  * system
@@ -26,6 +29,8 @@ public interface IAuthenticatable {
    * The name of the property, which is used to specify a current user
    */
   public static final String CURRENT_USER_PROPERTY = "currentUser";
+
+  public static final IIndexedField EMAIL = new IndexedField("email");
 
   /**
    * The email to be used for login and registration
