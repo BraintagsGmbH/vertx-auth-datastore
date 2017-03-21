@@ -167,7 +167,7 @@ public class DataStoreAuth implements IDatastoreAuth {
   @SuppressWarnings("unchecked")
   protected IQuery<IAuthenticatable> createQuery(String username) {
     IQuery<IAuthenticatable> query = datastore.createQuery(mapper.getMapperClass());
-    query.setSearchCondition(ISearchCondition.isEqual("email", username));
+    query.setSearchCondition(ISearchCondition.isEqual(IAuthenticatable.EMAIL, username));
     return query;
   }
 
