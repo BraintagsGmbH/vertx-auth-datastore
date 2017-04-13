@@ -40,12 +40,12 @@ public class DatastoreUser extends AbstractUser {
     // default constructor
   }
 
-  public DatastoreUser(String username, IDatastoreAuth datastoreAuth) {
+  public DatastoreUser(final String username, final IDatastoreAuth datastoreAuth) {
     this.principal = new JsonObject().put("email", username);
     this.datastoreAuth = datastoreAuth;
   }
 
-  public DatastoreUser(IAuthenticatable userObject, IDatastoreAuth datastoreAuth) {
+  public DatastoreUser(final IAuthenticatable userObject, final IDatastoreAuth datastoreAuth) {
     this.userObject = userObject;
     this.datastoreAuth = datastoreAuth;
     createPrincipal();
@@ -54,7 +54,7 @@ public class DatastoreUser extends AbstractUser {
   private void createPrincipal() {
     this.principal = new JsonObject();
     IMapper mapper = datastoreAuth.getMapper();
-    IProperty idField = mapper.getIdField().getField();
+    IProperty idField = mapper.getIdInfo().getField();
     Object idValue = idField.getPropertyAccessor().readData(userObject);
     principal.put(idField.getName(), idValue).put("email", userObject.getEmail());
   }
@@ -69,7 +69,7 @@ public class DatastoreUser extends AbstractUser {
   }
 
   @Override
-  public void doIsPermitted(String permissionOrRole, Handler<AsyncResult<Boolean>> resultHandler) {
+  public void doIsPermitted(final String permissionOrRole, final Handler<AsyncResult<Boolean>> resultHandler) {
     if (permissionOrRole != null && permissionOrRole.startsWith(IDatastoreAuth.ROLE_PREFIX)) {
       String roledef = permissionOrRole.substring(IDatastoreAuth.ROLE_PREFIX.length());
       doHasRole(roledef, resultHandler);
@@ -94,7 +94,7 @@ public class DatastoreUser extends AbstractUser {
    * @see io.vertx.ext.auth.User#setAuthProvider(io.vertx.ext.auth.AuthProvider)
    */
   @Override
-  public void setAuthProvider(AuthProvider authProvider) {
+  public void setAuthProvider(final AuthProvider authProvider) {
     this.datastoreAuth = (IDatastoreAuth) authProvider;
   }
 
@@ -106,7 +106,7 @@ public class DatastoreUser extends AbstractUser {
    * @param resultHandler
    *          resultHandler gets true, if role is valid, otherwise false
    */
-  protected void doHasRole(String role, Handler<AsyncResult<Boolean>> resultHandler) {
+  protected void doHasRole(final String role, final Handler<AsyncResult<Boolean>> resultHandler) {
     try {
       resultHandler
           .handle(Future.succeededFuture(userObject.getRoles() != null && userObject.getRoles().contains(role)));
@@ -124,7 +124,7 @@ public class DatastoreUser extends AbstractUser {
    *          resulthandler gets true, if permission is valid, otherwise false
    * 
    */
-  protected void doHasPermission(String permission, Handler<AsyncResult<Boolean>> resultHandler) {
+  protected void doHasPermission(final String permission, final Handler<AsyncResult<Boolean>> resultHandler) {
     try {
       resultHandler.handle(Future
           .succeededFuture(userObject.getPermissions() != null && userObject.getPermissions().contains(permission)));
