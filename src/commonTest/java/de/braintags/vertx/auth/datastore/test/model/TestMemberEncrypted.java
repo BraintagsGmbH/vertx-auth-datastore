@@ -1,4 +1,3 @@
-package de.braintags.vertx.auth.datastore.test.model;
 /*
  * #%L
  * vertx-auth-datastore
@@ -11,20 +10,20 @@ package de.braintags.vertx.auth.datastore.test.model;
  * http://www.eclipse.org/legal/epl-v10.html
  * #L%
  */
-
+package de.braintags.vertx.auth.datastore.test.model;
 
 import java.util.List;
 
+import de.braintags.vertx.auth.datastore.IAuthenticatable;
 import de.braintags.vertx.jomnigate.annotation.Entity;
 import de.braintags.vertx.jomnigate.annotation.field.Encoder;
 import de.braintags.vertx.jomnigate.annotation.field.Id;
-import de.braintags.vertx.auth.datastore.IAuthenticatable;
 
 /**
- * 
- * 
+ *
+ *
  * @author Michael Remme
- * 
+ *
  */
 @Entity
 public class TestMemberEncrypted implements IAuthenticatable {
@@ -40,7 +39,8 @@ public class TestMemberEncrypted implements IAuthenticatable {
 
   }
 
-  public TestMemberEncrypted(String username, String password, List<String> roles, List<String> permissions) {
+  public TestMemberEncrypted(final String username, final String password, final List<String> roles,
+      final List<String> permissions) {
     this.email = username;
     this.password = password;
     this.roles = roles;
@@ -49,7 +49,7 @@ public class TestMemberEncrypted implements IAuthenticatable {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.vertx.auth.datastore.IAuthenticatable#getEmail()
    */
   @Override
@@ -59,17 +59,17 @@ public class TestMemberEncrypted implements IAuthenticatable {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.vertx.auth.datastore.IAuthenticatable#setEmail(java.lang.String)
    */
   @Override
-  public void setEmail(String email) {
+  public void setEmail(final String email) {
     this.email = email;
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.vertx.auth.datastore.IAuthenticatable#getPassword()
    */
   @Override
@@ -79,17 +79,17 @@ public class TestMemberEncrypted implements IAuthenticatable {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.vertx.auth.datastore.IAuthenticatable#setPassword(java.lang.String)
    */
   @Override
-  public void setPassword(String password) {
+  public void setPassword(final String password) {
     this.password = password;
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.vertx.auth.datastore.IAuthenticatable#getRoles()
    */
   @Override
@@ -99,17 +99,17 @@ public class TestMemberEncrypted implements IAuthenticatable {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.vertx.auth.datastore.IAuthenticatable#setRoles(java.util.List)
    */
   @Override
-  public void setRoles(List<String> roles) {
+  public void setRoles(final List<String> roles) {
     this.roles = roles;
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.vertx.auth.datastore.IAuthenticatable#getPermissions()
    */
   @Override
@@ -119,11 +119,11 @@ public class TestMemberEncrypted implements IAuthenticatable {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see de.braintags.vertx.auth.datastore.IAuthenticatable#setPermissions(java.util.List)
    */
   @Override
-  public void setPermissions(List<String> permissions) {
+  public void setPermissions(final List<String> permissions) {
     this.permissions = permissions;
   }
 
